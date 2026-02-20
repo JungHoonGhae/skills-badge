@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 interface BadgeOptions {
   label: string;
   message: string;
@@ -161,7 +163,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(svg, {
     headers: {
       'Content-Type': 'image/svg+xml',
-      'Cache-Control': 's-maxage=3600, stale-while-revalidate',
+      'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=86400',
     },
   });
 }
