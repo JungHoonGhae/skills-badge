@@ -1,5 +1,6 @@
 # skills-badge
 
+[![skills.sh](https://skills-badge.vercel.app/badge/JungHoonGhae/skills-badge?style=flat-square&label=installs)](https://skills.sh/JungHoonGhae/skills-badge)
 [![GitHub stars](https://img.shields.io/github/stars/JungHoonGhae/skills-badge)](https://github.com/JungHoonGhae/skills-badge/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/JungHoonGhae/skills-badge/blob/main/LICENSE)
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://skills-badge.vercel.app)
@@ -54,10 +55,11 @@ If this tool helps you, consider supporting its maintenance:
 
 | Query Param | Default   | Description                                                    |
 | ----------- | --------- | -------------------------------------------------------------- |
-| `style`       | `flat`      | Badge style: `flat`, `flat-square`, `plastic`, `for-the-badge`, `social` |
-| `label`       | `skills.sh` | Left side label text                                           |
+| `style`       | `flat`      | Badge style: `flat`, `flat-square` |
+| `label`       | (empty)     | Left side label text (shows logo only if empty)                |
 | `labelColor`  | `#3b82f6`   | Left side background color (hex)                               |
 | `color`       | `#22c55e`   | Right side background color (hex)                              |
+| `logo`        | `true`      | Show Vercel logo (`false` to hide)                             |
 
 ### Custom Styling
 
