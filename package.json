@@ -1,0 +1,14 @@
+{
+  "name": "skills-badge",
+  "version": "1.0.0",
+  "description": "Dynamic download badges for skills.sh",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "devDependencies": {
+    "@vercel/node": "^3.0.0"
+  },
+  "license": "MIT"
+}

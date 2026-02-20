@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/badge/:owner/:repo/:skill", "destination": "/api/badge" },
+    { "source": "/badge/:owner/:repo", "destination": "/api/badge" }
+  ]
+}
