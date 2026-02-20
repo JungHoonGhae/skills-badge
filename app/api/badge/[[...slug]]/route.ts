@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface BadgeOptions {
   label: string;
@@ -8,7 +8,6 @@ interface BadgeOptions {
   style?: 'flat' | 'flat-square' | 'plastic' | 'for-the-badge' | 'social';
 }
 
-// SVG badge generator (shields.io compatible)
 function generateBadge(options: BadgeOptions): string {
   const {
     label,
@@ -21,7 +20,6 @@ function generateBadge(options: BadgeOptions): string {
   const fontSize = 11;
   const padding = 6;
   
-  // Calculate text widths (approximate)
   const labelWidth = Math.ceil(label.length * 6.6) + padding * 2;
   const messageWidth = Math.ceil(message.length * 6.6) + padding * 2;
   const totalWidth = labelWidth + messageWidth;
@@ -35,7 +33,6 @@ function generateBadge(options: BadgeOptions): string {
 </svg>`;
   }
 
-  // flat style (default)
   const height = 20;
   const radius = 3;
 
@@ -83,12 +80,17 @@ function formatDownloads(count: number): string {
 
 async function getInstallCount(owner: string, repo: string): Promise<number | null> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
     const response = await fetch(`https://skills.sh/${owner}/${repo}`, {
       headers: {
         'User-Agent': 'skills-badge/1.0'
       },
-      signal: AbortSignal.timeout(3000)
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       return null;
@@ -107,14 +109,18 @@ async function getInstallCount(owner: string, repo: string): Promise<number | nu
   }
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { owner, repo } = req.query as { owner?: string; repo?: string };
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const pathname = request.nextUrl.pathname;
   
-  // Query params
-  const style = (req.query.style as string) || 'flat';
-  const label = (req.query.label as string) || 'skills.sh';
-  const labelColor = req.query.labelColor as string;
-  const color = req.query.color as string;
+  const pathParts = pathname.split('/').filter(Boolean);
+  const owner = pathParts[1];
+  const repo = pathParts[2];
+  
+  const style = searchParams.get('style') || 'flat';
+  const label = searchParams.get('label') || 'skills.sh';
+  const labelColor = searchParams.get('labelColor');
+  const color = searchParams.get('color');
   
   const validStyles = ['flat', 'flat-square', 'plastic', 'for-the-badge', 'social'];
   const badgeStyle = validStyles.includes(style) ? style as BadgeOptions['style'] : 'flat';
@@ -127,9 +133,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       style: badgeStyle
     });
     
-    res.setHeader('Content-Type', 'image/svg+xml');
-    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate');
-    return res.send(svg);
+    return new NextResponse(svg, {
+      headers: {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 's-maxage=86400, stale-while-revalidate',
+      },
+    });
   }
   
   const count = await getInstallCount(owner, repo);
@@ -142,7 +151,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     style: badgeStyle
   });
   
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-  return res.send(svg);
+  return new NextResponse(svg, {
+    headers: {
+      'Content-Type': 'image/svg+xml',
+      'Cache-Control': 's-maxage=3600, stale-while-revalidate',
+    },
+  });
 }
