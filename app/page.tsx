@@ -3,7 +3,7 @@ import * as React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Github, Copy, Check } from "lucide-react"
+import { Github, Copy, Check, ExternalLink } from "lucide-react"
 
 const PARAMS = [
   { param: "style", default: "flat", description: "Badge style: flat, flat-square, plastic, for-the-badge, social" },
@@ -44,7 +44,7 @@ function BadgePreview() {
   const [badgeUrl, setBadgeUrl] = React.useState("")
   
   React.useEffect(() => {
-    setBadgeUrl(`${window.location.origin}/badge/${owner}/${repo}`)
+    setBadgeUrl(`${window.location.origin}/api/badge/${owner}/${repo}`)
   }, [owner, repo])
   
   return (
@@ -72,7 +72,7 @@ function BadgePreview() {
           />
         )}
       </div>
-      <CodeBlock code={`![skills.sh](${badgeUrl})`} />
+      <CodeBlock code={`![skills.sh](${badgeUrl.replace('/api/badge/', '/api/badge/')})`} />
     </div>
   )
 }
@@ -82,16 +82,29 @@ export default function Home() {
     <main className="min-h-screen py-16 px-4">
       <div className="max-w-2xl mx-auto space-y-12">
         <header className="text-center space-y-4">
+          <a 
+            href="https://skills.sh" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
+            <img 
+              src="https://skills.sh/favicon.ico" 
+              alt="skills.sh" 
+              className="w-12 h-12 rounded-lg"
+            />
+          </a>
           <h1 className="text-4xl font-bold tracking-tight">skills-badge</h1>
           <p className="text-muted-foreground text-lg">
             Dynamic SVG badges for{" "}
             <a 
               href="https://skills.sh" 
-              className="text-foreground underline underline-offset-4 hover:text-foreground/80"
+              className="text-foreground underline underline-offset-4 hover:text-foreground/80 inline-flex items-center gap-1"
               target="_blank"
               rel="noopener noreferrer"
             >
               skills.sh
+              <ExternalLink className="h-3 w-3" />
             </a>{" "}
             install counts
           </p>
@@ -112,7 +125,7 @@ export default function Home() {
             <CardTitle>Usage</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/badge/{owner}/{repo})`} />
+            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/api/badge/{owner}/{repo})`} />
           </CardContent>
         </Card>
 
@@ -149,11 +162,26 @@ export default function Home() {
             <CardTitle>Custom Styling Example</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/badge/JungHoonGhae/ships-with-steipete?style=flat-square&label=installs&color=blue)`} />
+            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/api/badge/JungHoonGhae/ships-with-steipete?style=flat-square&label=installs&color=blue)`} />
           </CardContent>
         </Card>
 
-        <footer className="flex justify-center pt-8">
+        <footer className="flex justify-center gap-4 pt-8">
+          <Button variant="ghost" asChild>
+            <a 
+              href="https://skills.sh" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            >
+              <img 
+                src="https://skills.sh/favicon.ico" 
+                alt="skills.sh" 
+                className="w-4 h-4"
+              />
+              skills.sh
+            </a>
+          </Button>
           <Button variant="ghost" asChild>
             <a 
               href="https://github.com/JungHoonGhae/skills-badge" 
