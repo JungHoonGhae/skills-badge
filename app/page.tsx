@@ -1,5 +1,6 @@
 "use client"
 import * as React from "react"
+import Image from "next/image"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -75,10 +76,12 @@ function BadgePreview() {
       </div>
       <div className="flex items-center justify-center p-8 bg-muted rounded-lg min-h-[80px]">
         {badgeUrl && (
-          <img 
+          <Image 
             src={badgeUrl} 
             alt="skills.sh badge" 
-            className="h-5"
+            width={100}
+            height={20}
+            unoptimized
           />
         )}
       </div>
@@ -98,10 +101,12 @@ export default function Home() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <img 
+            <Image 
               src="https://skills.sh/favicon.ico" 
               alt="skills.sh" 
-              className="w-12 h-12 rounded-lg"
+              width={48}
+              height={48}
+              className="rounded-lg"
             />
           </a>
           <h1 className="text-4xl font-bold tracking-tight">skills-badge</h1>
@@ -190,10 +195,11 @@ export default function Home() {
               rel="noopener noreferrer"
               className="flex items-center gap-2"
             >
-              <img 
+              <Image 
                 src="https://skills.sh/favicon.ico" 
                 alt="skills.sh" 
-                className="w-4 h-4"
+                width={16}
+                height={16}
               />
               skills.sh
             </a>

@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
+const LOGO_SVG = `<path fill="#fff" d="M6.5 2h7l-4 7h4l-7.5 9 2.5-6h-4l4-7h-2z"/>`;
+
 interface BadgeOptions {
   label: string;
   message: string;
   labelColor?: string;
   color?: string;
   style?: 'flat' | 'flat-square' | 'plastic' | 'for-the-badge' | 'social';
+  showLogo?: boolean;
 }
 
 function generateBadge(options: BadgeOptions): string {
@@ -16,27 +19,40 @@ function generateBadge(options: BadgeOptions): string {
     message,
     labelColor = '#555',
     color = '#4c1',
-    style = 'flat'
+    style = 'flat',
+    showLogo = true
   } = options;
 
   const fontSize = 11;
   const padding = 6;
+  const hasLabel = label.length > 0;
+  const logoWidth = showLogo ? 14 : 0;
+  const logoPadding = showLogo ? 8 : 0;
   
-  const labelWidth = Math.ceil(label.length * 6.6) + padding * 2;
+  const labelTextWidth = hasLabel ? Math.ceil(label.length * 6.6) + padding * 2 : 0;
+  const labelWidth = showLogo ? logoWidth + logoPadding + labelTextWidth : labelTextWidth || padding * 2;
   const messageWidth = Math.ceil(message.length * 6.6) + padding * 2;
-  const totalWidth = labelWidth + messageWidth;
+  const totalWidth = (labelWidth > 0 ? labelWidth : logoWidth + logoPadding) + messageWidth;
+
+  const logoSvg = showLogo ? `<svg x="4" y="3" width="14" height="14" viewBox="0 0 16 16">${LOGO_SVG}</svg>` : '';
+  const textX = showLogo && hasLabel ? logoWidth + logoPadding + labelTextWidth / 2 : (hasLabel ? labelWidth / 2 : 0);
+  const labelText = hasLabel ? `<text x="${textX}" y="14" fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11" text-anchor="middle">${escapeXml(label)}</text>` : '';
+
+  const actualLabelWidth = labelWidth > 0 ? labelWidth : logoWidth + logoPadding;
 
   if (style === 'flat-square') {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="20">
   <rect width="${totalWidth}" height="20" fill="${labelColor}"/>
-  <rect x="${labelWidth}" width="${messageWidth}" height="20" fill="${color}"/>
-  <text x="${labelWidth / 2}" y="14" fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11" text-anchor="middle">${escapeXml(label)}</text>
-  <text x="${labelWidth + messageWidth / 2}" y="14" fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11" text-anchor="middle">${escapeXml(message)}</text>
+  <rect x="${actualLabelWidth}" width="${messageWidth}" height="20" fill="${color}"/>
+  ${logoSvg}${labelText}
+  <text x="${actualLabelWidth + messageWidth / 2}" y="14" fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11" text-anchor="middle">${escapeXml(message)}</text>
 </svg>`;
   }
 
   const height = 20;
   const radius = 3;
+
+  const flatLabelText = hasLabel ? `<text x="${textX}" y="15" fill="#010101" fill-opacity=".3">${escapeXml(label)}</text><text x="${textX}" y="14">${escapeXml(label)}</text>` : '';
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${height}">
   <linearGradient id="s" x2="0" y2="100%">
@@ -47,16 +63,16 @@ function generateBadge(options: BadgeOptions): string {
     <rect width="${totalWidth}" height="${height}" rx="${radius}" fill="#fff"/>
   </clipPath>
   <g clip-path="url(#r)">
-    <rect width="${labelWidth}" height="${height}" fill="${labelColor}"/>
-    <rect x="${labelWidth}" width="${messageWidth}" height="${height}" fill="${color}"/>
+    <rect width="${actualLabelWidth}" height="${height}" fill="${labelColor}"/>
+    <rect x="${actualLabelWidth}" width="${messageWidth}" height="${height}" fill="${color}"/>
     <rect width="${totalWidth}" height="${height}" fill="url(#s)"/>
   </g>
   <rect width="${totalWidth}" height="${height}" rx="${radius}" fill="none" stroke="#000" stroke-opacity=".1"/>
+  ${logoSvg}
   <g fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="${fontSize}" text-anchor="middle">
-    <text x="${labelWidth / 2}" y="15" fill="#010101" fill-opacity=".3">${escapeXml(label)}</text>
-    <text x="${labelWidth / 2}" y="14">${escapeXml(label)}</text>
-    <text x="${labelWidth + messageWidth / 2}" y="15" fill="#010101" fill-opacity=".3">${escapeXml(message)}</text>
-    <text x="${labelWidth + messageWidth / 2}" y="14">${escapeXml(message)}</text>
+    ${flatLabelText}
+    <text x="${actualLabelWidth + messageWidth / 2}" y="15" fill="#010101" fill-opacity=".3">${escapeXml(message)}</text>
+    <text x="${actualLabelWidth + messageWidth / 2}" y="14">${escapeXml(message)}</text>
   </g>
 </svg>`;
 }
@@ -127,19 +143,21 @@ export async function GET(request: NextRequest) {
   const skill = pathParts[3];
   
   const style = searchParams.get('style') || 'flat';
-  const label = searchParams.get('label') || 'skills.sh';
+  const label = searchParams.get('label') || '';
   const labelColor = searchParams.get('labelColor');
   const color = searchParams.get('color');
+  const logo = searchParams.get('logo') !== 'false';
   
   const validStyles = ['flat', 'flat-square', 'plastic', 'for-the-badge', 'social'];
   const badgeStyle = validStyles.includes(style) ? style as BadgeOptions['style'] : 'flat';
   
   if (!owner || !repo) {
     const svg = generateBadge({
-      label: 'skills.sh',
+      label: '',
       message: 'invalid',
       color: '#9f9f9f',
-      style: badgeStyle
+      style: badgeStyle,
+      showLogo: logo
     });
     
     return new NextResponse(svg, {
@@ -157,7 +175,8 @@ export async function GET(request: NextRequest) {
     message: count !== null ? formatDownloads(count) : 'available',
     labelColor: labelColor || '#3b82f6',
     color: color || '#22c55e',
-    style: badgeStyle
+    style: badgeStyle,
+    showLogo: logo
   });
   
   return new NextResponse(svg, {
