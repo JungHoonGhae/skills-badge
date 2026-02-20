@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-const LOGO_SVG = `<path fill="#fff" d="M6.5 2h7l-4 7h4l-7.5 9 2.5-6h-4l4-7h-2z"/>`;
+const VERCEL_LOGO = `<path fill="#fff" fill-rule="evenodd" clip-rule="evenodd" d="M8 1L16 15H0L8 1Z"/>`;
 
 interface BadgeOptions {
   label: string;
   message: string;
   labelColor?: string;
   color?: string;
-  style?: 'flat' | 'flat-square' | 'plastic' | 'for-the-badge' | 'social';
+  style?: 'flat' | 'flat-square';
   showLogo?: boolean;
 }
 
@@ -34,7 +34,7 @@ function generateBadge(options: BadgeOptions): string {
   const messageWidth = Math.ceil(message.length * 6.6) + padding * 2;
   const totalWidth = (labelWidth > 0 ? labelWidth : logoWidth + logoPadding) + messageWidth;
 
-  const logoSvg = showLogo ? `<svg x="4" y="3" width="14" height="14" viewBox="0 0 16 16">${LOGO_SVG}</svg>` : '';
+  const logoSvg = showLogo ? `<svg x="4" y="4" width="12" height="12" viewBox="0 0 16 16">${VERCEL_LOGO}</svg>` : '';
   const textX = showLogo && hasLabel ? logoWidth + logoPadding + labelTextWidth / 2 : (hasLabel ? labelWidth / 2 : 0);
   const labelText = hasLabel ? `<text x="${textX}" y="14" fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11" text-anchor="middle">${escapeXml(label)}</text>` : '';
 
