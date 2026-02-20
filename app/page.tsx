@@ -41,11 +41,15 @@ function CodeBlock({ code }: { code: string }) {
 function BadgePreview() {
   const [owner, setOwner] = React.useState("JungHoonGhae")
   const [repo, setRepo] = React.useState("ships-with-steipete")
+  const [skill, setSkill] = React.useState("")
   const [badgeUrl, setBadgeUrl] = React.useState("")
   
   React.useEffect(() => {
-    setBadgeUrl(`${window.location.origin}/api/badge/${owner}/${repo}`)
-  }, [owner, repo])
+    const path = skill 
+      ? `${owner}/${repo}/${skill}` 
+      : `${owner}/${repo}`
+    setBadgeUrl(`${window.location.origin}/badge/${path}`)
+  }, [owner, repo, skill])
   
   return (
     <div className="space-y-4">
@@ -62,6 +66,12 @@ function BadgePreview() {
           onChange={(e) => setRepo(e.target.value)}
           className="flex-1"
         />
+        <Input
+          placeholder="skill (optional)"
+          value={skill}
+          onChange={(e) => setSkill(e.target.value)}
+          className="flex-1"
+        />
       </div>
       <div className="flex items-center justify-center p-8 bg-muted rounded-lg min-h-[80px]">
         {badgeUrl && (
@@ -72,7 +82,7 @@ function BadgePreview() {
           />
         )}
       </div>
-      <CodeBlock code={`![skills.sh](${badgeUrl.replace('/api/badge/', '/api/badge/')})`} />
+      <CodeBlock code={`![skills.sh](${badgeUrl})`} />
     </div>
   )
 }
@@ -113,7 +123,7 @@ export default function Home() {
         <Card>
           <CardHeader>
             <CardTitle>Try it</CardTitle>
-            <CardDescription>Enter an owner and repo to see a live badge</CardDescription>
+            <CardDescription>Enter owner, repo, and optionally skill name</CardDescription>
           </CardHeader>
           <CardContent>
             <BadgePreview />
@@ -125,7 +135,10 @@ export default function Home() {
             <CardTitle>Usage</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/api/badge/{owner}/{repo})`} />
+            <p className="text-sm text-muted-foreground">Repository level:</p>
+            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/badge/{owner}/{repo})`} />
+            <p className="text-sm text-muted-foreground">Skill level (multi-skill repos):</p>
+            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/badge/{owner}/{repo}/{skill})`} />
           </CardContent>
         </Card>
 
@@ -159,10 +172,13 @@ export default function Home() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Custom Styling Example</CardTitle>
+            <CardTitle>Examples</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/api/badge/JungHoonGhae/ships-with-steipete?style=flat-square&label=installs&color=blue)`} />
+            <p className="text-sm text-muted-foreground">Default style:</p>
+            <CodeBlock code={`![skills.sh](https://skills-badge.vercel.app/badge/JungHoonGhae/ships-with-steipete)`} />
+            <p className="text-sm text-muted-foreground">Flat-square with custom label:</p>
+            <CodeBlock code={`![installs](https://skills-badge.vercel.app/badge/JungHoonGhae/ships-with-steipete?style=flat-square&label=installs&color=blue)`} />
           </CardContent>
         </Card>
 

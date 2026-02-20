@@ -78,12 +78,13 @@ function formatDownloads(count: number): string {
   return count.toString();
 }
 
-async function getInstallCount(owner: string, repo: string): Promise<number | null> {
+async function getInstallCount(owner: string, repo: string, skill?: string): Promise<number | null> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
     
-    const response = await fetch(`https://skills.sh/${owner}/${repo}`, {
+    const path = skill ? `${owner}/${repo}/${skill}` : `${owner}/${repo}`;
+    const response = await fetch(`https://skills.sh/${path}`, {
       headers: {
         'User-Agent': 'skills-badge/1.0'
       },
@@ -98,9 +99,14 @@ async function getInstallCount(owner: string, repo: string): Promise<number | nu
     
     const html = await response.text();
     
-    const match = html.match(/(\d+)\s*(?:<!--[^>]*-->\s*)*total\s+installs/i);
-    if (match) {
-      return parseInt(match[1], 10);
+    const totalMatch = html.match(/(\d+)\s*(?:<!--[^>]*-->\s*)*total\s+installs/i);
+    if (totalMatch) {
+      return parseInt(totalMatch[1], 10);
+    }
+    
+    const weeklyMatch = html.match(/Weekly\s+Installs\s*(\d+)/i);
+    if (weeklyMatch) {
+      return parseInt(weeklyMatch[1], 10);
     }
     
     return null;
@@ -116,6 +122,7 @@ export async function GET(request: NextRequest) {
   const pathParts = pathname.split('/').filter(Boolean);
   const owner = pathParts[1];
   const repo = pathParts[2];
+  const skill = pathParts[3];
   
   const style = searchParams.get('style') || 'flat';
   const label = searchParams.get('label') || 'skills.sh';
@@ -141,7 +148,7 @@ export async function GET(request: NextRequest) {
     });
   }
   
-  const count = await getInstallCount(owner, repo);
+  const count = await getInstallCount(owner, repo, skill);
   
   const svg = generateBadge({
     label,
