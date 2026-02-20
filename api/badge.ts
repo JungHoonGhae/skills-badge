@@ -96,7 +96,7 @@ async function getInstallCount(owner: string, repo: string): Promise<number | nu
     
     const html = await response.text();
     
-    const match = html.match(/(\d+)\s+total\s+installs/i);
+    const match = html.match(/(\d+)\s*(?:<!--[^>]*-->\s*)*total\s+installs/i);
     if (match) {
       return parseInt(match[1], 10);
     }
